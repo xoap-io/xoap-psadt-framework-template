@@ -18,7 +18,7 @@
 .PARAMETER AllowRebootPassThru
 	Allows the 3010 return code (requires restart) to be passed back to the parent process (e.g. SCCM) if detected from an installation. If 3010 is passed back to SCCM, a reboot prompt will be triggered.
 .PARAMETER TerminalServerMode
-	Changes to "user install mode" and back to "user execute mode" for installing/uninstalling applications for Remote Destkop Session Hosts/Citrix servers.
+	Changes to "user install mode" and back to "user execute mode" for installing/uninstalling applications for Remote Desktop Session Hosts/Citrix servers.
 .PARAMETER DisableLogging
 	Disables logging to file for the script. Default is: $false.
 .EXAMPLE
@@ -119,24 +119,14 @@ Try {
 		##*===============================================
 		[string]$installPhase = 'Pre-Installation'
 
+		## Show Welcome Message, close Internet Explorer if required, allow up to 3 deferrals, verify there is enough disk space to complete the install, and persist the prompt
+		# Show-InstallationWelcome -CloseApps 'iexplore' -AllowDefer -DeferTimes 3 -CheckDiskSpace -PersistPrompt
+
+		## Show Progress Message (with the default message)
+		# Show-InstallationProgress
+
 		## <Perform Pre-Installation tasks here>
-		If (Get-PSRepository | Where-Object { $_.Name -eq "PSGallery" -and $_.InstallationPolicy -ne "Trusted" }) {
-			Install-PackageProvider -Name "NuGet" -MinimumVersion 2.8.5.208 -Force
-			Set-PSRepository -Name "PSGallery" -InstallationPolicy "Trusted"
-		}
 
-		$Installed = Get-Module -Name "Evergreen" -ListAvailable | `
-		Sort-Object -Property @{ Expression = { [System.Version]$_.Version }; Descending = $true } | `
-		Select-Object -First 1
-		$Published = Find-Module -Name "Evergreen"
-		If ($Null -eq $Installed) {
-			Install-Module -Name "Evergreen"
-		}
-		ElseIf ([System.Version]$Published.Version -gt [System.Version]$Installed.Version) {
-			Update-Module -Name "Evergreen"
-		}
-
-		Import-Module Evergreen
 
 		##*===============================================
 		##* INSTALLATION
@@ -151,9 +141,6 @@ Try {
 
 		## <Perform Installation tasks here>
 
-		$App = Get-EvergreenApp -Name MicrosoftTeams | Where-Object { $_.Architecture -eq "x64" -and $_.Ring -eq "General" }
-		$AppInstaller = Split-Path -Path $App.Uri -Leaf
-		Invoke-WebRequest -Uri $App.Uri -OutFile ".\$AppInstaller" -UseBasicParsing
 
 		##*===============================================
 		##* POST-INSTALLATION
@@ -162,15 +149,25 @@ Try {
 
 		## <Perform Post-Installation tasks here>
 		Register-Installation
-		}
-		ElseIf ($deploymentType -ieq 'Uninstall')
-		{
+		
+		## Display a message at the end of the install
+		# If (-not $useDefaultMsi) { Show-InstallationPrompt -Message 'You can customize text to appear at the end of an install or remove it completely for unattended installations.' -ButtonRightText 'OK' -Icon Information -NoWait }
+	}
+	ElseIf ($deploymentType -ieq 'Uninstall')
+	{
 		##*===============================================
 		##* PRE-UNINSTALLATION
 		##*===============================================
 		[string]$installPhase = 'Pre-Uninstallation'
 
+		## Show Welcome Message, close Internet Explorer with a 60 second countdown before automatically closing
+		# Show-InstallationWelcome -CloseApps 'iexplore' -CloseAppsCountdown 60
+
+		## Show Progress Message (with the default message)
+		# Show-InstallationProgress
+
 		## <Perform Pre-Uninstallation tasks here>
+
 
 		##*===============================================
 		##* UNINSTALLATION
@@ -185,6 +182,7 @@ Try {
 
 		# <Perform Uninstallation tasks here>
 
+
 		##*===============================================
 		##* POST-UNINSTALLATION
 		##*===============================================
@@ -193,16 +191,19 @@ Try {
 		## <Perform Post-Uninstallation tasks here>
 		DeRegister-Installation
 
-		}
-		ElseIf ($deploymentType -ieq 'Repair')
-		{
+	}
+	ElseIf ($deploymentType -ieq 'Repair')
+	{
 		##*===============================================
 		##* PRE-REPAIR
 		##*===============================================
 		[string]$installPhase = 'Pre-Repair'
 
+		## Show Welcome Message, close Internet Explorer with a 60 second countdown before automatically closing
+		# Show-InstallationWelcome -CloseApps 'iexplore' -CloseAppsCountdown 60
+
 		## Show Progress Message (with the default message)
-		Show-InstallationProgress
+		# Show-InstallationProgress
 
 		## <Perform Pre-Repair tasks here>
 
@@ -216,7 +217,7 @@ Try {
 			[hashtable]$ExecuteDefaultMSISplat =  @{ Action = 'Repair'; Path = $defaultMsiFile; }; If ($defaultMstFile) { $ExecuteDefaultMSISplat.Add('Transform', $defaultMstFile) }
 			Execute-MSI @ExecuteDefaultMSISplat
 		}
-		# <Perform Repair tasks here>
+		## <Perform Repair tasks here>
 
 		##*===============================================
 		##* POST-REPAIR
@@ -225,6 +226,7 @@ Try {
 
 		## <Perform Post-Repair tasks here>
 
+		
     }
 	##*===============================================
 	##* END SCRIPT BODY
