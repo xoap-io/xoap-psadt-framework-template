@@ -14,7 +14,9 @@
 
 ## Introduction
 
-We are using the PowerShell App Deployment Framework for all of our deployments with application.XO. This repository is a template for our PSADT Framework implementation and can be used to create your own PSADT Framework packages.
+We are using the PowerShell App Deployment Toolkit for all of our deployments with application.XO. 
+
+This repository is a template for our PSADT Framework implementation and can be used to create your own PSADT Framework packages.
 
 It is part of our [XOAP](https://xoap.io) Automation Forces Open Source community library
 to give you a quick start into Infrastructure as Code deployments with Terraform.
