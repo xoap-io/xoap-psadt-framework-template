@@ -51,42 +51,40 @@ Param (
 # Variables: Script
 [string]$appDeployToolkitExtName = 'PSAppDeployToolkitExt'
 [string]$appDeployExtScriptFriendlyName = 'App Deploy Toolkit Extensions'
-[version]$appDeployExtScriptVersion = [version]'3.9.2'
-[string]$appDeployExtScriptDate = '02/02/2023'
+[version]$appDeployExtScriptVersion = [version]'3.9.3'
+[string]$appDeployExtScriptDate = '02/05/2023'
 [hashtable]$appDeployExtScriptParameters = $PSBoundParameters
 
 ##*===============================================
 ##* FUNCTION LISTINGS
 ##*===============================================
 
-#region Register-Installation
 Function Register-Installation
 {
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'IsInstalled' -Value 1 -Type DWord
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptName' -Value "$appName" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptVendor' -Value "$appVendor" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptVersion' -Value "$appVersion" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptArch' -Value "$appArch" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptLanguage' -Value "$appLang" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptRevision' -Value "$appRevision" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptVersion' -Value "$appScriptVersion" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptDate' -Value "$appScriptDate" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptAuthor' -Value "$appScriptAuthor" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'PSADTVersion' -Value "$appDeployMainScriptVersion" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'InstallationDateTime' -Value "$currentDateTime" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'InstallationTimeZone' -Value "$currentTimeZoneBias" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'InstallationSource' -Value "$scriptParentPath" -Type String
-	$logFile = "{0}{1}" -f $logDirectory, $logName
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'LogFile' -Value "$logFile" -Type String
+    Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'IsInstalled' -Value 1 -Type DWord
+    Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptName' -Value "$appName" -Type String
+    Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptVendor' -Value "$appVendor" -Type String
+    Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptVersion' -Value "$appVersion" -Type String
+    Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptArch' -Value "$appArch" -Type String
+    Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptLanguage' -Value "$appLang" -Type String
+    Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptRevision' -Value "$appRevision" -Type String
+    Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptVersion' -Value "$appScriptVersion" -Type String
+    Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptDate' -Value "$appScriptDate" -Type String
+    Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptAuthor' -Value "$appScriptAuthor" -Type String
+    Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'PSADTVersion' -Value "$appDeployMainScriptVersion" -Type String
+    Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'InstallationDateTime' -Value "$currentDateTime" -Type String
+    Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'InstallationTimeZone' -Value "$currentTimeZoneBias" -Type String
+    Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'InstallationSource' -Value "$scriptParentPath" -Type String
+    $logFile = "{0}{1}" -f $logDirectory, $logName
+    Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'LogFile' -Value "$logFile" -Type String
 }
 #endregion
 
 #region Unregister-Installation
 Function Unregister-Installation
 {
-	Remove-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName"
+    Remove-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName"
 }
-#endregion
 
 ##*===============================================
 ##* END FUNCTION LISTINGS

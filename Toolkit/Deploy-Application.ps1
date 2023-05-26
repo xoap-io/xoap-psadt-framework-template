@@ -78,6 +78,7 @@ Toolkit Exit Code Ranges:
 https://psappdeploytoolkit.com
 #>
 
+
 [CmdletBinding()]
 Param (
     [Parameter(Mandatory = $false)]
@@ -102,26 +103,24 @@ Try {
     Catch {
     }
 
- 	##*===============================================
-	##* VARIABLE DECLARATION
-	##*===============================================
-	## Variables: Application
-	[string]$appVendor = ''
-	[string]$appName = ''
-	[string]$appVersion = ''
-	[string]$appArch = ''
-	[string]$appLang = 'EN'
-	[string]$appRevision = '01'
-	[string]$appScriptVersion = '1.0.0'
-	[string]$appScriptDate = 'XX/XX/20XX'
-	[string]$appScriptAuthor = '<author name>'
-	##*===============================================
-	## Variables: Application Tags (Those tags specified here will be added to the uploaded applications in XOAP - application.XO)
-	[string]$appTags = ''
-	##*===============================================
-	## Variables: Install Titles (Only set here to override defaults set by the toolkit)
-	[string]$installName = ''
-	[string]$installTitle = ''
+    ##*===============================================
+    ##* VARIABLE DECLARATION
+    ##*===============================================
+    ## Variables: Application
+    [String]$appVendor = ''
+    [String]$appName = ''
+    [String]$appVersion = ''
+    [String]$appArch = ''
+    [String]$appLang = 'EN'
+    [String]$appRevision = '01'
+    [String]$appScriptVersion = '1.0.0'
+    [String]$appScriptDate = 'XX/XX/20XX'
+    [String]$appScriptAuthor = '<author name>'
+    [string]$appTags = ''
+    ##*===============================================
+    ## Variables: Install Titles (Only set here to override defaults set by the toolkit)
+    [String]$installName = ''
+    [String]$installTitle = ''
 
     ##* Do not modify section below
     #region DoNotModify
@@ -131,8 +130,8 @@ Try {
 
     ## Variables: Script
     [String]$deployAppScriptFriendlyName = 'Deploy Application'
-    [Version]$deployAppScriptVersion = [Version]'3.9.2'
-    [String]$deployAppScriptDate = '02/02/2023'
+    [Version]$deployAppScriptVersion = [Version]'3.9.3'
+    [String]$deployAppScriptDate = '02/05/2023'
     [Hashtable]$deployAppScriptParameters = $PsBoundParameters
 
     ## Variables: Environment
@@ -184,10 +183,10 @@ Try {
         [String]$installPhase = 'Pre-Installation'
 
         ## Show Welcome Message, close Internet Explorer if required, allow up to 3 deferrals, verify there is enough disk space to complete the install, and persist the prompt
-        # Show-InstallationWelcome -CloseApps 'iexplore' -AllowDefer -DeferTimes 3 -CheckDiskSpace -PersistPrompt
+        #Show-InstallationWelcome -CloseApps 'iexplore' -AllowDefer -DeferTimes 3 -CheckDiskSpace -PersistPrompt
 
         ## Show Progress Message (with the default message)
-        # Show-InstallationProgress
+        Show-InstallationProgress
 
         ## <Perform Pre-Installation tasks here>
 
@@ -215,13 +214,14 @@ Try {
         ##*===============================================
         [String]$installPhase = 'Post-Installation'
 
-        ## <Perform Post-Installation tasks here>
         Register-Installation
 
+        ## <Perform Post-Installation tasks here>
+
         ## Display a message at the end of the install
-        # If (-not $useDefaultMsi) {
-        #     Show-InstallationPrompt -Message 'You can customize text to appear at the end of an install or remove it completely for unattended installations.' -ButtonRightText 'OK' -Icon Information -NoWait
-        # }
+        #If (-not $useDefaultMsi) {
+        #    Show-InstallationPrompt -Message 'You can customize text to appear at the end of an install or remove it completely for unattended installations.' -ButtonRightText 'OK' -Icon Information -NoWait
+        #}
     }
     ElseIf ($deploymentType -ieq 'Uninstall') {
         ##*===============================================
@@ -230,10 +230,10 @@ Try {
         [String]$installPhase = 'Pre-Uninstallation'
 
         ## Show Welcome Message, close Internet Explorer with a 60 second countdown before automatically closing
-        # Show-InstallationWelcome -CloseApps 'iexplore' -CloseAppsCountdown 60
+        #Show-InstallationWelcome -CloseApps 'iexplore' -CloseAppsCountdown 60
 
         ## Show Progress Message (with the default message)
-        # Show-InstallationProgress
+        Show-InstallationProgress
 
         ## <Perform Pre-Uninstallation tasks here>
 
@@ -260,6 +260,7 @@ Try {
         [String]$installPhase = 'Post-Uninstallation'
 
         ## <Perform Post-Uninstallation tasks here>
+
         Unregister-Installation
 
     }
@@ -270,13 +271,12 @@ Try {
         [String]$installPhase = 'Pre-Repair'
 
         ## Show Welcome Message, close Internet Explorer with a 60 second countdown before automatically closing
-        # Show-InstallationWelcome -CloseApps 'iexplore' -CloseAppsCountdown 60
+        #Show-InstallationWelcome -CloseApps 'iexplore' -CloseAppsCountdown 60
 
         ## Show Progress Message (with the default message)
-        # Show-InstallationProgress
+        Show-InstallationProgress
 
         ## <Perform Pre-Repair tasks here>
-
 
         ##*===============================================
         ##* REPAIR
@@ -291,7 +291,6 @@ Try {
             Execute-MSI @ExecuteDefaultMSISplat
         }
         ## <Perform Repair tasks here>
-
 
         ##*===============================================
         ##* POST-REPAIR
