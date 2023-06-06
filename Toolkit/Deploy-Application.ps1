@@ -214,13 +214,12 @@ Try {
         ##*===============================================
         [String]$installPhase = 'Post-Installation'
 
-        Register-Installation
-
         ## <Perform Post-Installation tasks here>
+        Register-Installation
 
         ## Display a message at the end of the install
         #If (-not $useDefaultMsi) {
-        #    Show-InstallationPrompt -Message 'You can customize text to appear at the end of an install or remove it completely for unattended installations.' -ButtonRightText 'OK' -Icon Information -NoWait
+            #Show-InstallationPrompt -Message 'You can customize text to appear at the end of an install or remove it completely for unattended installations.' -ButtonRightText 'OK' -Icon Information -NoWait
         #}
     }
     ElseIf ($deploymentType -ieq 'Uninstall') {
@@ -260,7 +259,6 @@ Try {
         [String]$installPhase = 'Post-Uninstallation'
 
         ## <Perform Post-Uninstallation tasks here>
-
         Unregister-Installation
 
     }
