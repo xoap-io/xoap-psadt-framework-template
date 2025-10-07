@@ -11,7 +11,7 @@ PSApppDeployToolkit - This script performs the installation or uninstallation of
 
 The script dot-sources the AppDeployToolkitMain.ps1 script which contains the logic and functions required to install or uninstall an application.
 
-PSApppDeployToolkit is licensed under the GNU LGPLv3 License - (C) 2023 PSAppDeployToolkit Team (Sean Lillis, Dan Cunningham and Muhammad Mashwani).
+PSApppDeployToolkit is licensed under the GNU LGPLv3 License - (C) 2024 PSAppDeployToolkit Team (Sean Lillis, Dan Cunningham and Muhammad Mashwani).
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the
 Free Software Foundation, either version 3 of the License, or any later version. This program is distributed in the hope that it will be useful, but
@@ -78,9 +78,10 @@ Toolkit Exit Code Ranges:
 https://psappdeploytoolkit.com
 #>
 
+
 [CmdletBinding()]
 Param (
-    [Parameter(Mandatory = $false)]
+    [Parameter(Mandatory = $true)]
     [ValidateSet('Install', 'Uninstall', 'Repair')]
     [String]$DeploymentType = 'Install',
     [Parameter(Mandatory = $false)]
@@ -98,30 +99,34 @@ Try {
     ## Set the script execution policy for this process
     Try {
         Set-ExecutionPolicy -ExecutionPolicy 'ByPass' -Scope 'Process' -Force -ErrorAction 'Stop'
-    }
+    } 
     Catch {
     }
 
- 	##*===============================================
-	##* VARIABLE DECLARATION
-	##*===============================================
-	## Variables: Application
-	[string]$appVendor = ''
-	[string]$appName = ''
-	[string]$appVersion = ''
-	[string]$appArch = ''
-	[string]$appLang = 'EN'
-	[string]$appRevision = '01'
-	[string]$appScriptVersion = '1.0.0'
-	[string]$appScriptDate = 'XX/XX/20XX'
-	[string]$appScriptAuthor = '<author name>'
-	##*===============================================
-	## Variables: Application Tags (Those tags specified here will be added to the uploaded applications in XOAP - application.XO)
+    ##*===============================================
+    ##* VARIABLE DECLARATION
+    ##*===============================================
+    ## Variables: Application
+    [String]$appVendor = ''
+    [String]$appName = ''
+    [String]$appVersion = ''
+    [String]$appArch = ''
+    [String]$appLang = 'EN'
+    [String]$appRevision = '01'
+    [String]$appScriptVersion = '1.0.0'
+    [String]$appScriptDate = 'XX/XX/20XX'
+    [String]$appScriptAuthor = '<author name>'
+    ##*===============================================
+    ## Variables: Application Tags (Those tags specified here will be added to the uploaded applications in XOAP - application.XO)
 	[string]$appTags = ''
-	##*===============================================
-	## Variables: Install Titles (Only set here to override defaults set by the toolkit)
-	[string]$installName = ''
-	[string]$installTitle = ''
+    [string]$PackageName = ''
+    [string]$PackageType = ''
+    ## Variables: Install Titles (Only set here to override defaults set by the toolkit)
+    [String]$installName = ''
+    [String]$installTitle = ''
+
+    ## Variable: Application Tags (Those tags specified here will be added to the uploaded applications in XOAP - application.XO)
+    [string]$appTags = ''
 
     ##* Do not modify section below
     #region DoNotModify
@@ -131,8 +136,8 @@ Try {
 
     ## Variables: Script
     [String]$deployAppScriptFriendlyName = 'Deploy Application'
-    [Version]$deployAppScriptVersion = [Version]'3.9.2'
-    [String]$deployAppScriptDate = '02/02/2023'
+    [Version]$deployAppScriptVersion = [Version]'3.10.1'
+    [String]$deployAppScriptDate = '05/03/2024'
     [Hashtable]$deployAppScriptParameters = $PsBoundParameters
 
     ## Variables: Environment
@@ -184,13 +189,27 @@ Try {
         [String]$installPhase = 'Pre-Installation'
 
         ## Show Welcome Message, close Internet Explorer if required, allow up to 3 deferrals, verify there is enough disk space to complete the install, and persist the prompt
-        # Show-InstallationWelcome -CloseApps 'iexplore' -AllowDefer -DeferTimes 3 -CheckDiskSpace -PersistPrompt
+        ## Adjust the executables accordingly for your installation
+        ## If you do not want to close any applications, remove the -CloseApps parameter
+        if (Test-AppInstalled -RegistryKeyPath $baseKey) {
+            #Show-InstallationPrompt -Message "The application is already installed." -ButtonRightText "OK" -Icon Information
+            Exit-Script -ExitCode 0
+        }
+                
+        Show-InstallationWelcome -CloseApps 'iexplore' -CloseAppsCountdown 300 -AllowDefer -DeferTimes 3 -CheckDiskSpace
 
         ## Show Progress Message (with the default message)
-        # Show-InstallationProgress
+        Show-InstallationProgress
 
         ## <Perform Pre-Installation tasks here>
+        ## Adjust the executables accordingly for your installation
+        $appsToCheck = 'chrome','iexplore','winword'
+        $runningApps = Get-Process | Where-Object { $appsToCheck -contains $_.Name }
 
+        if ($runningApps) {
+            Write-Log -Message "Detected running apps: $($runningApps.Name -join ', ')" -Severity 2
+            Exit-Script -ExitCode 1618  # Recommended: indicate retry needed
+        }
 
         ##*===============================================
         ##* INSTALLATION
@@ -219,9 +238,11 @@ Try {
         Register-Installation
 
         ## Display a message at the end of the install
-        # If (-not $useDefaultMsi) {
-        #     Show-InstallationPrompt -Message 'You can customize text to appear at the end of an install or remove it completely for unattended installations.' -ButtonRightText 'OK' -Icon Information -NoWait
-        # }
+        ## Adjust the message accordingly for your installation
+       
+        If (-not $useDefaultMsi) {
+            Show-InstallationPrompt -Message 'You can customize text to appear at the end of an install or remove it completely for unattended installations.' -ButtonRightText 'OK' -Icon Information -NoWait
+        }
     }
     ElseIf ($deploymentType -ieq 'Uninstall') {
         ##*===============================================
@@ -230,10 +251,10 @@ Try {
         [String]$installPhase = 'Pre-Uninstallation'
 
         ## Show Welcome Message, close Internet Explorer with a 60 second countdown before automatically closing
-        # Show-InstallationWelcome -CloseApps 'iexplore' -CloseAppsCountdown 60
+        Show-InstallationWelcome -CloseApps 'iexplore' -CloseAppsCountdown 60
 
         ## Show Progress Message (with the default message)
-        # Show-InstallationProgress
+        Show-InstallationProgress
 
         ## <Perform Pre-Uninstallation tasks here>
 
@@ -270,13 +291,12 @@ Try {
         [String]$installPhase = 'Pre-Repair'
 
         ## Show Welcome Message, close Internet Explorer with a 60 second countdown before automatically closing
-        # Show-InstallationWelcome -CloseApps 'iexplore' -CloseAppsCountdown 60
+        Show-InstallationWelcome -CloseApps 'iexplore' -CloseAppsCountdown 60
 
         ## Show Progress Message (with the default message)
-        # Show-InstallationProgress
+        Show-InstallationProgress
 
         ## <Perform Pre-Repair tasks here>
-
 
         ##*===============================================
         ##* REPAIR
@@ -291,7 +311,6 @@ Try {
             Execute-MSI @ExecuteDefaultMSISplat
         }
         ## <Perform Repair tasks here>
-
 
         ##*===============================================
         ##* POST-REPAIR

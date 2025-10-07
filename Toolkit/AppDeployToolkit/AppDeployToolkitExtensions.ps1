@@ -9,7 +9,7 @@ This script is a template that allows you to extend the toolkit with your own cu
 
 This script is dot-sourced by the AppDeployToolkitMain.ps1 script which contains the logic and functions required to install or uninstall an application.
 
-PSApppDeployToolkit is licensed under the GNU LGPLv3 License - (C) 2023 PSAppDeployToolkit Team (Sean Lillis, Dan Cunningham and Muhammad Mashwani).
+PSApppDeployToolkit is licensed under the GNU LGPLv3 License - (C) 2024 PSAppDeployToolkit Team (Sean Lillis, Dan Cunningham and Muhammad Mashwani).
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the
 Free Software Foundation, either version 3 of the License, or any later version. This program is distributed in the hope that it will be useful, but
@@ -51,40 +51,69 @@ Param (
 # Variables: Script
 [string]$appDeployToolkitExtName = 'PSAppDeployToolkitExt'
 [string]$appDeployExtScriptFriendlyName = 'App Deploy Toolkit Extensions'
-[version]$appDeployExtScriptVersion = [version]'3.9.2'
-[string]$appDeployExtScriptDate = '02/02/2023'
+[version]$appDeployExtScriptVersion = [version]'3.10.1'
+[string]$appDeployExtScriptDate = '05/03/2024'
 [hashtable]$appDeployExtScriptParameters = $PSBoundParameters
+
+$baseKey = "HKEY_LOCAL_MACHINE\SOFTWARE\XOAP\application.XO\InstalledApps\$PackageName"
 
 ##*===============================================
 ##* FUNCTION LISTINGS
 ##*===============================================
 
+# <Your custom functions go here>
+
 #region Register-Installation
 Function Register-Installation
 {
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'IsInstalled' -Value 1 -Type DWord
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptName' -Value "$appName" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptVendor' -Value "$appVendor" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptVersion' -Value "$appVersion" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptArch' -Value "$appArch" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptLanguage' -Value "$appLang" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptRevision' -Value "$appRevision" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptVersion' -Value "$appScriptVersion" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptDate' -Value "$appScriptDate" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'ScriptAuthor' -Value "$appScriptAuthor" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'PSADTVersion' -Value "$appDeployMainScriptVersion" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'InstallationDateTime' -Value "$currentDateTime" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'InstallationTimeZone' -Value "$currentTimeZoneBias" -Type String
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'InstallationSource' -Value "$scriptParentPath" -Type String
+	Set-RegistryKey -Key $baseKey -Name 'IsInstalled' -Value 1 -Type DWord
+	Set-RegistryKey -Key $baseKey -Name 'ScriptName' -Value "$appName" -Type String
+	Set-RegistryKey -Key $baseKey -Name 'ScriptVendor' -Value "$appVendor" -Type String
+	Set-RegistryKey -Key $baseKey -Name 'AppVersion' -Value "$appVersion" -Type String
+	Set-RegistryKey -Key $baseKey -Name 'ScriptArch' -Value "$appArch" -Type String
+	Set-RegistryKey -Key $baseKey -Name 'ScriptLanguage' -Value "$appLang" -Type String
+	Set-RegistryKey -Key $baseKey -Name 'ScriptRevision' -Value "$appRevision" -Type String
+	Set-RegistryKey -Key $baseKey -Name 'ScriptVersion' -Value "$appScriptVersion" -Type String
+	Set-RegistryKey -Key $baseKey -Name 'ScriptDate' -Value "$appScriptDate" -Type String
+	Set-RegistryKey -Key $baseKey -Name 'ScriptAuthor' -Value "$appScriptAuthor" -Type String
+	Set-RegistryKey -Key $baseKey -Name 'PSADTVersion' -Value "$appDeployMainScriptVersion" -Type String
+	Set-RegistryKey -Key $baseKey -Name 'InstallationDateTime' -Value "$currentDateTime" -Type String
+	Set-RegistryKey -Key $baseKey -Name 'InstallationTimeZone' -Value "$currentTimeZoneBias" -Type String
+	Set-RegistryKey -Key $baseKey -Name 'InstallationSource' -Value "$scriptParentPath" -Type String
 	$logFile = "{0}{1}" -f $logDirectory, $logName
-	Set-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName" -Name 'LogFile' -Value "$logFile" -Type String
+	Set-RegistryKey -Key $baseKey -Name 'LogFile' -Value "$logFile" -Type String
 }
 #endregion
 
 #region Unregister-Installation
 Function Unregister-Installation
 {
-	Remove-RegistryKey -Key "HKEY_LOCAL_MACHINE\SOFTWARE\PSADT\InstalledApps\$PackageName"
+	Remove-RegistryKey -Key $baseKey
+}
+#endregion
+
+#region Get-RegistryKey
+Function Test-AppInstalled {
+    param (
+        [string]$RegistryKeyPath,
+        [string]$ExpectedVersion
+    )
+
+    try {
+        $isInstalled = Get-RegistryKey -Key $RegistryKeyPath -Name 'IsInstalled'
+        $installedVersion = Get-RegistryKey -Key $RegistryKeyPath -Name 'AppVersion'
+
+        if ($isInstalled -eq 1 -and $installedVersion -eq $ExpectedVersion) {
+            Write-Log -Message "Version $ExpectedVersion is already installed." -Severity 1
+            return $true
+        } else {
+            Write-Log -Message "Installed version is $installedVersion, expected is $ExpectedVersion. Reinstall will proceed." -Severity 2
+            return $false
+        }
+    } catch {
+        Write-Log -Message "App not found in registry: $RegistryKeyPath" -Severity 3
+        return $false
+    }
 }
 #endregion
 
